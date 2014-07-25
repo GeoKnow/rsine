@@ -1,7 +1,7 @@
 @prefix spin: <http://spinrdf.org/sp/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix rsine: <http://lod2.eu/rsine/> .
-@prefix http: <http://www.w3.org/2011/http> .
+@prefix http: <http://www.w3.org/2011/http#> .
 
 <http://geoknow.eu/subnot-testing/prefLabelSubscription> a rsine:Subscription;
     rsine:query [
@@ -25,7 +25,7 @@
      ];
 
     rsine:notifier [
-        a rsine:httpNotifier, http:Request;
+        a rsine:httpNotifier;
         http:methodName "GET";
         http:absoluteURI <http://example.org/notify>;
     ].
