@@ -1,6 +1,8 @@
 package eu.lod2.rsine.dissemination.notifier.http;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collection;
 
@@ -17,20 +19,27 @@ public class HttpNotifier implements INotifier {
 
   private final Logger logger = LoggerFactory.getLogger(HttpNotifier.class);
 
-  private String method_name, uri;
+  private String method_name;
+  private URL url;
 
-  public HttpNotifier(String method, String uri) {
+  public HttpNotifier(String uri, String method) {
     this.method_name = method;
-    this.uri = uri;
+    try {
+      this.url = new URL(uri);
+    } catch (MalformedURLException e) {
+      logger.error("Couldnt initialise " + uri + " " + e.getMessage());
+      e.printStackTrace();
+    }
   }
 
   public void notify(Collection<String> messages) {
     HttpClient client = new HttpClient();
+    client.getHostConfiguration().setHost(url.getHost());
     HttpMethod method = null;
 
     if ("POST".equals(method_name)) {
-      PostMethod proxyMethod = new PostMethod(uri);
-      proxyMethod.addParameter("messages", messages.toString());
+      method = new PostMethod(url.toString());
+      ((PostMethod) method).addParameter("messages", messages.toString());
 
     } else if ("GET".equals(method_name)) {
 
@@ -42,15 +51,16 @@ public class HttpNotifier implements INotifier {
         e.printStackTrace();
       }
 
-      String url = String.format("%s%s", uri, params.toString());
-      GetMethod proxyMethod = new GetMethod(url);
+      String uri = String.format("%s%s", url.toString(), params.toString());
+      method = new GetMethod(uri);
     }
 
     try {
       client.executeMethod(method);
       method.releaseConnection();
     } catch (Exception e) {
-      logger.error("Couldnt notify to " + uri + " using " + method_name + " " + e.getMessage());
+      logger.error("Couldnt notify to " + url.toString() + " using " + method_name + " "
+          + e.getMessage());
       e.printStackTrace();
     }
 
