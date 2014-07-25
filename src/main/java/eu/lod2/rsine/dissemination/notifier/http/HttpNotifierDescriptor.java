@@ -15,7 +15,7 @@ public class HttpNotifierDescriptor implements NotifierDescriptor {
   public static final URI HTTP_METHOD_NAME = new URIImpl("http://www.w3.org/2011/http#methodName");
 
   public URI getType() {
-    return new URIImpl(Namespaces.RSINE_NAMESPACE.getName() + "emailNotifier");
+    return new URIImpl(Namespaces.RSINE_NAMESPACE.getName() + "httpNotifier");
   }
 
   public NotifierParameters getParameters() {
