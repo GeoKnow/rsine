@@ -94,6 +94,7 @@ public class RsineController {
         }
     }
 
+
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public void register(@RequestHeader("content-type") String contentType,
