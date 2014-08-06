@@ -1,20 +1,19 @@
 package at.punkt.lod2.util;
 
-import eu.lod2.rsine.dissemination.notifier.INotifier;
-
 import java.util.Collection;
+
+import eu.lod2.rsine.dissemination.notifier.INotifier;
 
 public class CountingNotifier implements INotifier {
 
-    private int notificationCount = 0;
+  private int notificationCount = 0;
 
-    @Override
-    public synchronized void notify(Collection<String> messages) {
-        notificationCount++;
-    }
+  public synchronized void notify(Collection<String> messages) {
+    notificationCount++;
+  }
 
-    public synchronized int getNotificationCount() {
-        return notificationCount;
-    }
+  public synchronized int getNotificationCount() {
+    return notificationCount;
+  }
 
 }

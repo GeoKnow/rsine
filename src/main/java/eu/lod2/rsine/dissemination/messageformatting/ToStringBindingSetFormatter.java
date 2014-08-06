@@ -4,9 +4,8 @@ import org.openrdf.query.BindingSet;
 
 public class ToStringBindingSetFormatter implements BindingSetFormatter {
 
-    @Override
-    public String toMessage(BindingSet bindingSet) {
-        return bindingSet.toString();
-    }
+  public String toMessage(BindingSet bindingSet) {
+    return bindingSet.toString();
+  }
 
 }
