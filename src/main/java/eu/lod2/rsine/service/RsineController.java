@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Controller
 public class RsineController {
@@ -39,20 +41,56 @@ public class RsineController {
     @Autowired
     private FeedbackService feedbackService;
 
+    private volatile boolean async = false;
+    private final int NUM_SERVCIE_THREADS = 15;
+    private ExecutorService es = Executors.newFixedThreadPool(NUM_SERVCIE_THREADS);
+
+    @RequestMapping(value = "/async", method = RequestMethod.POST)
+    @ResponseBody
+    public void async(@RequestParam boolean async, HttpServletResponse response) {
+        this.async = async;
+        logger.info("Set asychronous request handling to " + this.async);
+    }
+
     @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
-    public void announceTriples(@RequestBody String announcedTriple, HttpServletResponse response) throws IOException {
-        try {
-            changeTripleService.handleAnnouncedTriple(announcedTriple);
-        }
-        catch (ItemNotFoundException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No triple or change type provided");
-        }
-        catch (RDFParseException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error parsing provided triple");
-        }
-        catch (RDFHandlerException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    public void announceTriples(@RequestBody final String announcedTriple, HttpServletResponse response) throws IOException {
+
+        if (async) {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        changeTripleService.handleAnnouncedTriple(announcedTriple);
+                    }
+                    catch (ItemNotFoundException e) {
+                        logger.warn("No triple or change type provided");
+                        //response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No triple or change type provided");
+                    }
+                    catch (RDFParseException e) {
+                        logger.warn("Error parsing provided triple");
+                        //response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error parsing provided triple");
+                    }
+                    catch (Exception e) {
+                        logger.warn(e.getMessage());
+                        //response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                    }
+                }
+            };
+            es.execute(r);
+        } else {
+            try {
+                changeTripleService.handleAnnouncedTriple(announcedTriple);
+            }
+            catch (ItemNotFoundException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No triple or change type provided");
+            }
+            catch (RDFParseException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error parsing provided triple");
+            }
+            catch (RDFHandlerException e) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            }
         }
     }
 
