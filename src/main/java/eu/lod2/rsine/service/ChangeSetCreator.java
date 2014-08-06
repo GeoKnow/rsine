@@ -51,15 +51,16 @@ public class ChangeSetCreator {
             createStatementNode(statement, graph)));
     }
 
-    private BNode createStatementNode(Statement affectedStatement, Graph graph) {
-        BNode statementNode = valueFactory.createBNode();
+    private URI createStatementNode(Statement affectedStatement, Graph graph) {
+        URI statementUri = valueFactory.createURI(Namespaces.CS_NAMESPACE.getName(),
+                "stmnode" + System.currentTimeMillis() + "_" + Math.round(Math.random() * 1000));
 
-        graph.add(new StatementImpl(statementNode, RDF.TYPE, RDF.STATEMENT));
-        graph.add(new StatementImpl(statementNode, RDF.SUBJECT, affectedStatement.getSubject()));
-        graph.add(new StatementImpl(statementNode, RDF.PREDICATE, affectedStatement.getPredicate()));
-        graph.add(new StatementImpl(statementNode, RDF.OBJECT, affectedStatement.getObject()));
+        graph.add(new StatementImpl(statementUri, RDF.TYPE, RDF.STATEMENT));
+        graph.add(new StatementImpl(statementUri, RDF.SUBJECT, affectedStatement.getSubject()));
+        graph.add(new StatementImpl(statementUri, RDF.PREDICATE, affectedStatement.getPredicate()));
+        graph.add(new StatementImpl(statementUri, RDF.OBJECT, affectedStatement.getObject()));
 
-        return statementNode;
+        return statementUri;
     }
 
 }
