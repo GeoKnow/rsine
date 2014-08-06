@@ -45,13 +45,17 @@ public class QueryEvaluator {
 
     public Collection<String> evaluate(NotificationQuery query, IEvaluationPolicy usePolicy) throws OpenRDFException
     {
+        logger.debug("evaluate query: " + query.toString());
+
         usePolicy.checkEvaluationNeeded(query);
         String issuedQuery = fillInPlaceholders(query);
         long start = System.currentTimeMillis();
 
         RepositoryConnection repCon = managedStoreRepo.getConnection();
+        logger.debug("repCon: " + repCon.toString());
         try {
             Collection<String> messages = createMessages(query, issuedQuery, repCon);
+            logger.debug("messages: " + messages.toString());
             queryProfiler.log(issuedQuery, System.currentTimeMillis() - start);
             return messages;
         }
@@ -61,6 +65,7 @@ public class QueryEvaluator {
     }
 
     private String fillInPlaceholders(NotificationQuery query) {
+        logger.debug("fillInPlaceholders: " + query);
         String sparqlQuery;
         sparqlQuery = amendChangeSetsTimeConstraint(query);
         sparqlQuery = sparqlQuery.replace(AUTH_URI, authoritativeUri);
@@ -85,7 +90,11 @@ public class QueryEvaluator {
                                         String issuedQuery,
                                         RepositoryConnection managedStoreCon) throws OpenRDFException
     {
+        logger.debug("createMessages for query:" + query);
+        logger.debug("issuedQuery:" + query);
         Collection<BindingSet> results = changeSetStore.evaluateQuery(issuedQuery);
+        logger.debug("results.size: " + results.size());
+        logger.debug("changeSetStore: " + changeSetStore.toString());
         query.updateLastIssued();
 
         Collection<String> messages = new HashSet<String>();
@@ -120,6 +129,7 @@ public class QueryEvaluator {
             BooleanQuery booleanQuery = managedStoreCon.prepareBooleanQuery(QueryLanguage.SPARQL, condition.getAskQuery());
             setBinding(booleanQuery, bs);
 
+            logger.debug("ConditionQuery: " + booleanQuery.toString());
             return booleanQuery.evaluate() == condition.getExpectedResult();
         }
         catch (Exception e) {
@@ -160,7 +170,9 @@ public class QueryEvaluator {
         TupleQuery tupleQuery = repCon.prepareTupleQuery(QueryLanguage.SPARQL, query);
         setBinding(tupleQuery, bindingSet);
 
+        logger.debug("AuxQuery: "+ tupleQuery.toString());
         TupleQueryResult result = tupleQuery.evaluate();
+        logger.debug("AuxQuery results: " + result.toString());
         while (result.hasNext()) {
             BindingSet resultBindings = result.next();
             bindingSet.addAll(resultBindings);

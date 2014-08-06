@@ -26,6 +26,7 @@ public class PersistAndNotifyProvider {
 
     public synchronized void persistAndNotify(Model changeSet, boolean notifyOnlyLocal) {
         try {
+            logger.debug("persisting in changeSetStore: " + changeSet.toString());
             changeSetStore.persistChangeSet(changeSet);
         }
         catch (RepositoryException e) {

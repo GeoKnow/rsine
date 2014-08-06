@@ -33,7 +33,7 @@ public class ChangeSetStore {
         RepositoryConnection repCon = changeSetRepo.getConnection();
         repCon.add(changeSet);
         repCon.close();
-        logger.debug("created changeset: " +formatChangeSet(changeSet));
+        logger.debug("persistChangeSet created changeset: " + formatChangeSet(changeSet));
     }
 
     private String formatChangeSet(Graph changeSet) {
