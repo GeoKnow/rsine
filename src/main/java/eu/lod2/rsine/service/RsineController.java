@@ -58,7 +58,6 @@ public class RsineController {
 
         if (async) {
             Runnable r = new Runnable() {
-                @Override
                 public void run() {
                     try {
                         changeTripleService.handleAnnouncedTriple(announcedTriple);

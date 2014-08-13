@@ -19,7 +19,7 @@ public class PostponedQueryHandler {
     @Autowired
     private QueryDispatcher queryDispatcher;
 
-    private final Logger logger = LoggerFactory.getLogger(QueryDispatcher.class);
+    private final Logger logger = LoggerFactory.getLogger(PostponedQueryHandler.class);
     private Set<NotificationQuery> postponedQueries = new HashSet<NotificationQuery>();
 
     public synchronized void add(NotificationQuery notificationQuery) {
