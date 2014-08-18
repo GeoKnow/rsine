@@ -1,6 +1,9 @@
 package eu.lod2.rsine.queryhandling;
 
-import eu.lod2.rsine.registrationservice.NotificationQuery;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
@@ -9,9 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import eu.lod2.rsine.registrationservice.NotificationQuery;
 
 @Component
 public class PostponedQueryHandler {
@@ -19,34 +20,45 @@ public class PostponedQueryHandler {
     @Autowired
     private QueryDispatcher queryDispatcher;
 
-    private final Logger logger = LoggerFactory.getLogger(PostponedQueryHandler.class);
+    private final Logger logger = LoggerFactory
+	    .getLogger(PostponedQueryHandler.class);
     private Set<NotificationQuery> postponedQueries = new HashSet<NotificationQuery>();
 
     public synchronized void add(NotificationQuery notificationQuery) {
-        postponedQueries.add(notificationQuery);
-        logger.debug("Query postponed; now " +inQueue());
+	postponedQueries.add(notificationQuery);
+	logger.debug("Query postponed; now " + inQueue());
     }
 
     private String inQueue() {
-        return getQueueSize() + " pending";
+	return getQueueSize() + " pending";
     }
 
     public synchronized int getQueueSize() {
-        return postponedQueries.size();
+	return postponedQueries.size();
     }
 
     public synchronized void remove(NotificationQuery notificationQuery) {
-        postponedQueries.remove(notificationQuery);
-        logger.info("Postponed query processed; " +inQueue());
+	postponedQueries.remove(notificationQuery);
+	logger.info("Postponed query processed; " + inQueue());
     }
 
-    public void cleanUp() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        logger.debug("Cleaning up postponed queries; " + (postponedQueries.isEmpty() ? "nothing to do" : inQueue()));
-        for (NotificationQuery query : new ArrayList<NotificationQuery>(postponedQueries)) {
-            queryDispatcher.issueQueryAndNotify(query, true);
-            remove(query);
-        }
-        logger.debug("Postponed query cleanup finished");
+    public void cleanUp() throws RepositoryException, QueryEvaluationException,
+	    MalformedQueryException {
+	logger.debug("Cleaning up postponed queries; "
+		+ (postponedQueries.isEmpty() ? "nothing to do" : inQueue()));
+
+	Iterator<NotificationQuery> iter = postponedQueries.iterator();
+	if (iter.hasNext()) {
+	    NotificationQuery query = iter.next();
+	    queryDispatcher.issueQueryAndNotify(query, true);
+	    remove(query);
+	}
+	// for (NotificationQuery query : new
+	// ArrayList<NotificationQuery>(postponedQueries)) {
+	// queryDispatcher.issueQueryAndNotify(query, true);
+	// remove(query);
+	// }
+	logger.debug("Postponed query cleanup finished");
     }
 
 }
